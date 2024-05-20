@@ -209,7 +209,7 @@ async def leaderboard(ctx):
         print(f"Error in leaderboard command: {e}")
         
 @bot.command()
-async def bet_history_command(ctx):
+async def bet_history(ctx):
     try:
         user = str(ctx.author)
         if user not in bet_history or not bet_history[user]:
@@ -261,11 +261,11 @@ async def bet_help(ctx):
             "_Usage_: `!points`\n\n"
             "**!bet <amount> <game> <win/lose>**: Place a bet on a game.\n"
             "_Usage_: `!bet 50 game1 win` or `!bet 20 game2 lose`\n\n"
-            "**!resolve <game> <win/lose>**: (Admin only) Resolve a game and distribute points to winners.\n"
+            "**!resolve <game> <win/lose>**: Resolve a game and distribute points to winners.\n"
             "_Usage_: `!resolve game1 win`\n\n"
             "**!leaderboard**: Display the points leaderboard.\n"
             "_Usage_: `!leaderboard`\n\n"
-            "**!claim**: Claim your base points if you have none left (once every hour).\n"
+            "**!claim**: Claim your points if you have none left (once every week).\n"
             "_Usage_: `!claim`\n\n"
             "**!bet_history**: Display your betting history.\n"
             "_Usage_: `!bet_history`\n\n"
