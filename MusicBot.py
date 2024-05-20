@@ -4,8 +4,11 @@ from pytube import YouTube
 import asyncio
 import os
 import datetime
+import json
 from discord.voice_client import VoiceClient
 # brandon if you are reading this you are a stinky human HAHHAHAHHAHAHAH
+
+POINTS_FILE = 'user_points.json'
 
 permissions_integer = 274948226688
 permissions_numeric = int(permissions_integer)
@@ -18,6 +21,8 @@ voice_client = None
 
 # Queue to store URLs
 SongQueue = []
+# Store all bets here
+Bets = []
 
 # Function to join a voice channel
 async def join_voice_channel(channel_id):
@@ -37,6 +42,30 @@ async def disconnect_from_voice_channel(ctx):
     if voice_client is not None:
         await voice_client.disconnect()
         voice_client = None
+
+#load points from POINTS_FILE   
+def load_points():
+    if os.path.exists(POINTS_FILE):
+        try:
+            with open(POINTS_FILE, 'r') as f:
+                return json.load(f)
+        except json.JSONDecodeError:
+            print(f"Error: {POINTS_FILE} contains invalid JSON.")
+            return {}
+        except Exception as e:
+            print(f"Error reading {POINTS_FILE}: {e}")
+            return {}
+    return {}
+
+#saves points to POINTS_FILE
+def save_points(points):
+    try:
+        with open(POINTS_FILE, 'w') as f:
+            json.dump(points, f)
+    except Exception as e:
+        print(f"Error saving to {POINTS_FILE}: {e}")   
+
+user_points = load_points()       
 
 # Function to play music
 async def PlayMusic(ctx, url):
@@ -82,8 +111,84 @@ def connect_to_voice_channel(channel_id):
 
 # All bot commands start here
 @bot.command()
+async def points(ctx):
+    try:
+        user = str(ctx.author)
+        points = user_points.get(user, 100)  # Default to 100 points if user is not in the system
+        await ctx.send(f'{user}, you have {points} points.')
+    except Exception as e:
+        await ctx.send("An error occurred while retrieving your points.")
+        print(f"Error in points command: {e}") 
+        
+@bot.command()
+async def bet(ctx, amount: int, game: str, bet_type: str):
+    try:
+        user = str(ctx.author)
+        user_points.setdefault(user, 100)  # Ensure user has an entry in the points dictionary
+
+        if user_points[user] < amount:
+            await ctx.send(f'{user}, you do not have enough points to place this bet.')
+            return
+
+        if bet_type.lower() not in ['win', 'lose']:
+            await ctx.send(f'{user}, invalid bet type. Please use "win" or "lose".')
+            return
+
+        # Deduct points and record the bet
+        user_points[user] -= amount
+        bets.append({'user': user, 'amount': amount, 'game': game, 'type': bet_type.lower()})
+        save_points(user_points)
+        await ctx.send(f'{user} has placed a bet of {amount} points on {game} to {bet_type}.')
+    except Exception as e:
+        await ctx.send("An error occurred while placing your bet.")
+        print(f"Error in bet command: {e}")
+
+@bot.command()
+async def resolve(ctx, game: str, outcome: str):
+    try:
+        global bets
+        total_bet_points = sum(bet['amount'] for bet in bets if bet['game'] == game)
+        if outcome.lower() not in ['win', 'lose']:
+            await ctx.send(f'Invalid outcome. Please use "win" or "lose".')
+            return
+
+        winners = [bet for bet in bets if bet['game'] == game and bet['type'] == outcome.lower()]
+
+        if not winners:
+            await ctx.send(f'No winners for the game {game}.')
+            return
+
+        points_per_winner = total_bet_points // len(winners)
+        
+        for winner_bet in winners:
+            user_points[winner_bet['user']] += points_per_winner + winner_bet['amount']
+
+        # Remove resolved bets
+        bets = [bet for bet in bets if bet['game'] != game]
+        save_points(user_points)
+
+        await ctx.send(f'Game {game} resolved. Each winner receives {points_per_winner} points.')
+        leaderboard()
+    except Exception as e:
+        await ctx.send("An error occurred while resolving the game.")
+        print(f"Error in resolve command: {e}")
+        
+@bot.command()
+async def leaderboard(ctx):
+    try:
+        sorted_users = sorted(user_points.items(), key=lambda item: item[1], reverse=True)
+        leaderboard_message = "Leaderboard:\n"
+        for user, points in sorted_users:
+            leaderboard_message += f'{user}: {points} points\n'
+        await ctx.send(leaderboard_message)
+    except Exception as e:
+        await ctx.send("An error occurred while generating the leaderboard.")
+        print(f"Error in leaderboard command: {e}")
+
+@bot.command()
 async def join(ctx):
     channel = ctx.author.voice.channel
+    #jacob if you read this u are a N F R :D
     if channel:
         await channel.connect()
         print(f"Joined voice channel: {channel.name}")
