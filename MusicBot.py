@@ -9,6 +9,7 @@ from discord.voice_client import VoiceClient
 # brandon if you are reading this you are a stinky human HAHHAHAHHAHAHAH
 
 POINTS_FILE = 'user_points.json'
+BET_HISTORY_FILE = 'bet_history.json'
 BASE_POINTS = 500
 CLAIM_POINTS = BASE_POINTS//2
 COOLDOWN_PERIOD = 604800 #1 week cooldown
@@ -68,7 +69,8 @@ def save_points(points):
     except Exception as e:
         print(f"Error saving to {POINTS_FILE}: {e}")   
 
-user_points = load_points()       
+user_points = load_points()
+bet_history = load_json(BET_HISTORY_FILE)    
 
 # Function to play music
 async def PlayMusic(ctx, url):
@@ -139,8 +141,15 @@ async def bet(ctx, amount: int, game: str, bet_type: str):
 
         # Deduct points and record the bet
         user_points[user] -= amount
-        bets.append({'user': user, 'amount': amount, 'game': game, 'type': bet_type.lower()})
-        save_points(user_points)
+        bet_record = {'user': user, 'amount': amount, 'game': game, 'type': bet_type.lower(), 'outcome': None, 'points_gained': 0}
+        bets.append(bet_record)
+        
+        if user not in bet_history:
+            bet_history[user] = []
+        bet_history[user].append(bet_record)
+
+        save_json(POINTS_FILE, user_points)
+        save_json(BET_HISTORY_FILE, bet_history)
         await ctx.send(f'{user} has placed a bet of {amount} points on {game} to {bet_type}.')
     except Exception as e:
         await ctx.send("An error occurred while placing your bet.")
@@ -156,22 +165,33 @@ async def resolve(ctx, game: str, outcome: str):
             return
 
         winners = [bet for bet in bets if bet['game'] == game and bet['type'] == outcome.lower()]
+        losers = [bet for bet in bets if bet['game'] == game and bet['type'] != outcome.lower()]
 
         if not winners:
             await ctx.send(f'No winners for the game {game}.')
             return
 
-        points_per_winner = total_bet_points // len(winners)
-        
+        # Calculate odds
+        total_winner_bet_points = sum(bet['amount'] for bet in winners)
+        total_loser_bet_points = sum(bet['amount'] for bet in losers)
+        odds = (total_loser_bet_points / total_winner_bet_points) if total_winner_bet_points > 0 else 1
+
         for winner_bet in winners:
-            user_points[winner_bet['user']] += points_per_winner + winner_bet['amount']
+            payout = int(winner_bet['amount'] * odds) + winner_bet['amount']
+            user_points[winner_bet['user']] += payout
+            winner_bet['outcome'] = 'win'
+            winner_bet['points_gained'] = payout
+
+        for loser_bet in losers:
+            loser_bet['outcome'] = 'lose'
+            loser_bet['points_gained'] = -loser_bet['amount']
 
         # Remove resolved bets
         bets = [bet for bet in bets if bet['game'] != game]
-        save_points(user_points)
+        save_json(POINTS_FILE, user_points)
+        save_json(BET_HISTORY_FILE, bet_history)
 
-        await ctx.send(f'Game {game} resolved. Each winner receives {points_per_winner} points.')
-        leaderboard()
+        await ctx.send(f'Game {game} resolved. Winners received payouts based on odds of {odds:.2f}.')
     except Exception as e:
         await ctx.send("An error occurred while resolving the game.")
         print(f"Error in resolve command: {e}")
@@ -187,6 +207,27 @@ async def leaderboard(ctx):
     except Exception as e:
         await ctx.send("An error occurred while generating the leaderboard.")
         print(f"Error in leaderboard command: {e}")
+        
+@bot.command()
+async def bet_history_command(ctx):
+    try:
+        user = str(ctx.author)
+        if user not in bet_history or not bet_history[user]:
+            await ctx.send(f'{user}, you have no bet history.')
+        else:
+            history = bet_history[user]
+            history_message = f"{user}'s Bet History:\n"
+            for record in history:
+                outcome = record['outcome'] if record['outcome'] else 'pending'
+                points_gained = record['points_gained']
+                history_message += (
+                    f"Game: {record['game']}, Amount: {record['amount']}, Bet: {record['type']}, "
+                    f"Outcome: {outcome}, Points Gained/Lost: {points_gained}\n"
+                )
+            await ctx.send(history_message)
+    except Exception as e:
+        await ctx.send("An error occurred while retrieving your bet history.")
+        print(f"Error in bet_history command: {e}")
         
 @bot.command()
 @commands.cooldown(1, COOLDOWN_PERIOD, commands.BucketType.user)
@@ -220,12 +261,14 @@ async def bet_help(ctx):
             "_Usage_: `!points`\n\n"
             "**!bet <amount> <game> <win/lose>**: Place a bet on a game.\n"
             "_Usage_: `!bet 50 game1 win` or `!bet 20 game2 lose`\n\n"
-            "**!resolve <game> <win/lose>**: Resolve a game and distribute points to winners.\n"
+            "**!resolve <game> <win/lose>**: (Admin only) Resolve a game and distribute points to winners.\n"
             "_Usage_: `!resolve game1 win`\n\n"
             "**!leaderboard**: Display the points leaderboard.\n"
             "_Usage_: `!leaderboard`\n\n"
-            "**!claim**: Claim your points if you have none left (once every week).\n"
+            "**!claim**: Claim your base points if you have none left (once every hour).\n"
             "_Usage_: `!claim`\n\n"
+            "**!bet_history**: Display your betting history.\n"
+            "_Usage_: `!bet_history`\n\n"
             "Please note: The **!bet** command requires you to specify an amount, a game, and whether you are betting on a win or a loss."
         )
         await ctx.send(help_message)
