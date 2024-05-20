@@ -9,6 +9,9 @@ from discord.voice_client import VoiceClient
 # brandon if you are reading this you are a stinky human HAHHAHAHHAHAHAH
 
 POINTS_FILE = 'user_points.json'
+BASE_POINTS = 500
+CLAIM_POINTS = BASE_POINTS//2
+COOLDOWN_PERIOD = 604800 #1 week cooldown
 
 permissions_integer = 274948226688
 permissions_numeric = int(permissions_integer)
@@ -114,7 +117,7 @@ def connect_to_voice_channel(channel_id):
 async def points(ctx):
     try:
         user = str(ctx.author)
-        points = user_points.get(user, 100)  # Default to 100 points if user is not in the system
+        points = user_points.get(user, BASE_POINTS)  # Default to BASE_POINTS points if user is not in the system
         await ctx.send(f'{user}, you have {points} points.')
     except Exception as e:
         await ctx.send("An error occurred while retrieving your points.")
@@ -124,7 +127,7 @@ async def points(ctx):
 async def bet(ctx, amount: int, game: str, bet_type: str):
     try:
         user = str(ctx.author)
-        user_points.setdefault(user, 100)  # Ensure user has an entry in the points dictionary
+        user_points.setdefault(user, BASE_POINTS)  # Ensure user has an entry in the points dictionary
 
         if user_points[user] < amount:
             await ctx.send(f'{user}, you do not have enough points to place this bet.')
@@ -184,6 +187,51 @@ async def leaderboard(ctx):
     except Exception as e:
         await ctx.send("An error occurred while generating the leaderboard.")
         print(f"Error in leaderboard command: {e}")
+        
+@bot.command()
+@commands.cooldown(1, COOLDOWN_PERIOD, commands.BucketType.user)
+async def claim(ctx):
+    try:
+        user = str(ctx.author)
+        if user_points.get(user, 0) == 0:
+            user_points[user] = CLAIM_POINTS
+            save_points(user_points)
+            await ctx.send(f'{user}, you have been granted {CLAIM_POINTS} points.')
+        else:
+            await ctx.send(f'{user}, you still have points and cannot claim more at this time.')
+    except Exception as e:
+        await ctx.send("An error occurred while claiming points.")
+        print(f"Error in claim command: {e}")
+        
+@claim.error
+async def claim_error(ctx, error):
+    if isinstance(error, CommandOnCooldown):
+        await ctx.send(f'You can claim points only once every {COOLDOWN_PERIOD//60} minutes. Please wait before claiming again.')
+    else:
+        await ctx.send('An error occurred while claiming points.')
+        print(f"Error in claim_error handler: {e}")
+        
+@bot.command()
+async def bet_help(ctx):
+    try:
+        help_message = (
+            "Here are the commands you can use:\n\n"
+            "**!points**: Check your current points.\n"
+            "_Usage_: `!points`\n\n"
+            "**!bet <amount> <game> <win/lose>**: Place a bet on a game.\n"
+            "_Usage_: `!bet 50 game1 win` or `!bet 20 game2 lose`\n\n"
+            "**!resolve <game> <win/lose>**: Resolve a game and distribute points to winners.\n"
+            "_Usage_: `!resolve game1 win`\n\n"
+            "**!leaderboard**: Display the points leaderboard.\n"
+            "_Usage_: `!leaderboard`\n\n"
+            "**!claim**: Claim your points if you have none left (once every week).\n"
+            "_Usage_: `!claim`\n\n"
+            "Please note: The **!bet** command requires you to specify an amount, a game, and whether you are betting on a win or a loss."
+        )
+        await ctx.send(help_message)
+    except Exception as e:
+        await ctx.send("An error occurred while displaying help.")
+        print(f"Error in bet_help command: {e}")
 
 @bot.command()
 async def join(ctx):
