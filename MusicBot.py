@@ -47,6 +47,26 @@ async def disconnect_from_voice_channel(ctx):
         await voice_client.disconnect()
         voice_client = None
 
+def load_json(filename):
+    if os.path.exists(filename):
+        try:
+            with open(filename, 'r') as f:
+                return json.load(f)
+        except json.JSONDecodeError:
+            print(f"Error: {filename} contains invalid JSON.")
+            return {}
+        except Exception as e:
+            print(f"Error reading {filename}: {e}")
+            return {}
+    return {}
+
+def save_json(filename, data):
+    try:
+        with open(filename, 'w') as f:
+            json.dump(data, f)
+    except Exception as e:
+        print(f"Error saving to {filename}: {e}")
+
 #load points from POINTS_FILE   
 def load_points():
     if os.path.exists(POINTS_FILE):
