@@ -10,8 +10,7 @@ from discord.voice_client import VoiceClient
 # brandon if you are reading this you are a stinky human HAHHAHAHHAHAHAH
 
 # Replace 'YOUR_BOT_TOKEN' with your actual bot token
-TOKEN = 'YOUR_BOT_TOKEN'
-
+TOKEN = ''
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))  # Get the directory of the current script
 POINTS_FILE = os.path.join(BASE_DIR, 'user_points.json')
 BET_HISTORY_FILE = os.path.join(BASE_DIR, 'bet_history.json')
@@ -114,19 +113,23 @@ async def start_roll_game_after_delay(ctx, channel_id):
 
     rolls = sorted(rolls, key=lambda x: x['roll'])
     lowest_roll = rolls[0]
-    lowest_user = lowest_roll['user']
     lost_amount = lowest_roll['amount']
 
-    user_points[lowest_user] -= lost_amount
+    user_rolls_message = "Roll results:\n"
+    for roll in rolls:
+        user_rolls_message += f"{roll['user']}: {roll['roll']}\n"
+
+    user_points[lowest_roll['user']] -= lost_amount
 
     remaining_players = rolls[1:]
     for winner in remaining_players:
         user_points[winner['user']] += lost_amount // len(remaining_players)
 
-    await ctx.send(f"{lowest_user} rolled the lowest ({lowest_roll['roll']}) and lost {lost_amount} points. The points were distributed among the other players.")
+    await ctx.send(f"{user_rolls_message}\n{lowest_roll['user']} rolled the lowest ({lowest_roll['roll']}) and lost {lost_amount} points. The points were distributed among the other players.")
 
     roll_games[channel_id] = []
     save_json(POINTS_FILE, user_points)
+
 
 
 @bot.command(name='points')
