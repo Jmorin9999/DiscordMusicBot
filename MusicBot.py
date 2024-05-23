@@ -3,6 +3,7 @@ from discord.ext import commands
 from pytube import YouTube
 import asyncio
 import os
+import random
 import datetime
 import json
 from discord.voice_client import VoiceClient
@@ -10,9 +11,12 @@ from discord.voice_client import VoiceClient
 
 # Replace 'YOUR_BOT_TOKEN' with your actual bot token
 TOKEN = 'YOUR_BOT_TOKEN'
-POINTS_FILE = 'user_points.json'
-BET_HISTORY_FILE = 'bet_history.json'
-LOANS_FILE = 'loans.json'
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))  # Get the directory of the current script
+POINTS_FILE = os.path.join(BASE_DIR, 'user_points.json')
+BET_HISTORY_FILE = os.path.join(BASE_DIR, 'bet_history.json')
+LOANS_FILE = os.path.join(BASE_DIR, 'loans.json')
+
 BASE_POINTS = 500
 CLAIM_POINTS = BASE_POINTS // 2
 COOLDOWN_PERIOD = 3600  # Cooldown period in seconds (1 hour)
@@ -34,6 +38,8 @@ SongQueue = []
 bets = []
 loans = []
 locked_games = []
+roll_games = {}  # Dictionary to store active roll games by channel
+roll_timers = {}  # Dictionary to track timers for roll games by channel
 
 def load_json(filename):
     try:
@@ -67,6 +73,61 @@ loans = load_json(LOANS_FILE)
 @bot.event
 async def on_ready():
     print(f'Bot {bot.user} is now running!')
+
+@bot.command(name='roll')
+async def roll(ctx, amount: int):
+    try:
+        user = str(ctx.author)
+        user_points.setdefault(user, BASE_POINTS)
+
+        if amount <= 0:
+            await ctx.send('Please enter a valid amount to gamble.')
+            return
+
+        if user_points[user] < amount:
+            await ctx.send(f'You do not have enough points to gamble {amount} points.')
+            return
+
+        channel_id = ctx.channel.id
+        if channel_id not in roll_games:
+            roll_games[channel_id] = []
+            roll_timers[channel_id] = asyncio.create_task(start_roll_game_after_delay(ctx, channel_id))
+
+        roll_games[channel_id].append({'user': user, 'amount': amount})
+        await ctx.send(f'{user} has joined the roll game with {amount} points. The game will start in 30 seconds.')
+
+    except Exception as e:
+        await ctx.send("An error occurred while joining the roll game.")
+        print(f"Error in roll command: {e}")
+
+async def start_roll_game_after_delay(ctx, channel_id):
+    await asyncio.sleep(30)
+    if len(roll_games[channel_id]) < 2:
+        await ctx.send('Not enough players to start the roll game. At least 2 players are required.')
+        roll_games[channel_id] = []
+        return
+
+    rolls = []
+    for player in roll_games[channel_id]:
+        roll_result = random.randint(1, 100)
+        rolls.append({'user': player['user'], 'amount': player['amount'], 'roll': roll_result})
+
+    rolls = sorted(rolls, key=lambda x: x['roll'])
+    lowest_roll = rolls[0]
+    lowest_user = lowest_roll['user']
+    lost_amount = lowest_roll['amount']
+
+    user_points[lowest_user] -= lost_amount
+
+    remaining_players = rolls[1:]
+    for winner in remaining_players:
+        user_points[winner['user']] += lost_amount // len(remaining_players)
+
+    await ctx.send(f"{lowest_user} rolled the lowest ({lowest_roll['roll']}) and lost {lost_amount} points. The points were distributed among the other players.")
+
+    roll_games[channel_id] = []
+    save_json(POINTS_FILE, user_points)
+
 
 @bot.command(name='points')
 async def points(ctx):
