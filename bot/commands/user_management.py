@@ -42,4 +42,14 @@ def setup(bot, user_points, POINTS_FILE):
         else:
             await ctx.send(f'{user}, you already have {user_points[user]} points, which is above the claim amount.')
     
-    # Other user management commands can be added here
+    @bot.command(name='leaderboard')
+    async def leaderboard(ctx):
+        try:
+            sorted_points = sorted(user_points.items(), key=lambda x: x[1], reverse=True)
+            leaderboard_message = 'Leaderboard:\n'
+            for user, points in sorted_points:
+                leaderboard_message += f'{user}: {points} points\n'
+            await ctx.send(leaderboard_message)
+        except Exception as e:
+            await ctx.send("An error occurred while retrieving the leaderboard.")
+            print(f"Error in leaderboard command: {e}")
