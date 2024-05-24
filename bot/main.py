@@ -29,6 +29,7 @@ betting.setup(bot, user_points, bet_history, loans, POINTS_FILE, BET_HISTORY_FIL
 music.setup(bot)
 user_management.setup(bot, user_points, POINTS_FILE)
 fun.setup(bot)
+roll.setup(bot)
 
 @bot.event
 async def on_ready():
