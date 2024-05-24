@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands
 from bot.utils.json_handler import save_json
 
-def setup(bot, user_points, bet_history, loans, POINTS_FILE, BET_HISTORY_FILE, LOANS_FILE):
+def setup(bot, BASE_POINTS, user_points, bet_history, loans, POINTS_FILE, BET_HISTORY_FILE, LOANS_FILE):
     @bot.command(name='bet')
     async def bet(ctx, amount: int, game: str, bet_type: str):
         user = str(ctx.author)

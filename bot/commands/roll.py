@@ -6,7 +6,7 @@ from bot.utils.json_handler import save_json
 roll_games = {}  # Dictionary to store roll game data
 roll_timers = {}  # Dictionary to store roll game timers (to cancel if needed)
 
-def setup(bot, user_points, POINTS_FILE):
+def setup(bot, BASE_POINTS, user_points, POINTS_FILE):
     @bot.command(name='roll')
     async def roll(ctx, amount: int):
         try:

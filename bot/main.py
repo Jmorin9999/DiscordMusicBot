@@ -1,7 +1,7 @@
 import os
 import logging
 import discord
-from bot.config import *
+from config import *
 from discord.ext import commands
 from dotenv import load_dotenv
 from bot.utils.json_handler import load_json, save_json
@@ -26,11 +26,11 @@ bet_history = load_json(BET_HISTORY_FILE)
 loans = load_json(LOANS_FILE)
 
 # Register commands
-betting.setup(bot, user_points, bet_history, loans, POINTS_FILE, BET_HISTORY_FILE, LOANS_FILE)
+betting.setup(bot, BASE_POINTS, user_points, bet_history, loans, POINTS_FILE, BET_HISTORY_FILE, LOANS_FILE)
 music.setup(bot)
 user_management.setup(bot, user_points, POINTS_FILE)
 fun.setup(bot)
-roll.setup(bot, user_points, POINTS_FILE)
+roll.setup(bot, BASE_POINTS, user_points, POINTS_FILE)
 
 @bot.event
 async def on_ready():
