@@ -1,7 +1,7 @@
 import os
 import logging
 import discord
-from config import *
+from bot.config import BASE_POINTS, CLAIM_POINTS, CLAIM_COOLDOWN_PERIOD, LOAN_INTEREST_RATE
 from discord.ext import commands
 from dotenv import load_dotenv
 from bot.utils.json_handler import load_json, save_json
@@ -26,7 +26,7 @@ bet_history = load_json(BET_HISTORY_FILE)
 loans = load_json(LOANS_FILE)
 
 # Register commands
-betting.setup(bot, BASE_POINTS, user_points, bet_history, loans, POINTS_FILE, BET_HISTORY_FILE, LOANS_FILE)
+betting.setup(bot, BASE_POINTS, CLAIM_POINTS, CLAIM_COOLDOWN_PERIOD, LOAN_INTEREST_RATE, user_points, bet_history, loans, POINTS_FILE, BET_HISTORY_FILE, LOANS_FILE)
 music.setup(bot)
 user_management.setup(bot, user_points, POINTS_FILE)
 fun.setup(bot)
