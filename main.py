@@ -2,7 +2,7 @@ import os
 import logging
 from discord.ext import commands
 from dotenv import load_dotenv
-from utils.json_handler import load_json, save_json
+from json_handler import load_json, save_json
 from commands import betting, music, user_management, fun
 
 load_dotenv()
