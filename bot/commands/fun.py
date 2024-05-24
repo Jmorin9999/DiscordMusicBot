@@ -1,4 +1,6 @@
 import discord
+import matplotlib.pyplot as plt
+from io import BytesIO
 from wordcloud import WordCloud
 from discord.ext import commands
 
