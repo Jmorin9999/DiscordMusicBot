@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
-from ..utils.json_handler import save_json
-from ..config import BASE_POINTS, CLAIM_POINTS, CLAIM_COOLDOWN_PERIOD, LOAN_INTEREST_RATE
+from bot.utils.json_handler import save_json
+from bot.config import BASE_POINTS, CLAIM_POINTS, CLAIM_COOLDOWN_PERIOD, LOAN_INTEREST_RATE
 
 def setup(bot, user_points, POINTS_FILE):
     @bot.command(name='points')
