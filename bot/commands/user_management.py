@@ -1,3 +1,4 @@
+import discord
 from discord.ext import commands
 from ..utils.json_handler import save_json
 from ..config import BASE_POINTS, CLAIM_POINTS, CLAIM_COOLDOWN_PERIOD, LOAN_INTEREST_RATE
