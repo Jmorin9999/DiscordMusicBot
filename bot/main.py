@@ -4,7 +4,7 @@ import discord
 from discord.ext import commands
 from dotenv import load_dotenv
 from bot.utils.json_handler import load_json, save_json
-from bot.commands import betting, music, user_management, fun
+from bot.commands import betting, music, user_management, fun, roll
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
