@@ -1,4 +1,5 @@
 import discord
+from wordcloud import WordCloud
 from discord.ext import commands
 
 def setup(bot):
