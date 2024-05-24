@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands
 from pytube import YouTube
 import asyncio
-from utils.json_handler import load_json, save_json
+from ..utils.json_handler import load_json, save_json
 
 SongQueue = []
 
