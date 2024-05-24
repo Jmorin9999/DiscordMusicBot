@@ -1,5 +1,6 @@
 import os
 import logging
+import discord
 from discord.ext import commands
 from dotenv import load_dotenv
 from bot.utils.json_handler import load_json, save_json
