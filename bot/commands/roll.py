@@ -4,9 +4,8 @@ import asyncio
 from bot.config import BASE_POINTS, CLAIM_POINTS, CLAIM_COOLDOWN_PERIOD, LOAN_INTEREST_RATE
 from bot.utils.json_handler import save_json
 
-# Global variables
-roll_games = {}  # Dictionary to store roll game data
-roll_timers = {}  # Dictionary to store roll game timers (to cancel if needed)
+roll_games = {}  # Dictionary to store active roll games by channel
+roll_timers = {}  # Dictionary to track timers for roll games by channel
 
 def setup(bot, BASE_POINTS, user_points, POINTS_FILE):
     @bot.command(name='roll')
@@ -63,6 +62,5 @@ def setup(bot, BASE_POINTS, user_points, POINTS_FILE):
 
         await ctx.send(f"{user_rolls_message}\n{lowest_roll['user']} rolled the lowest ({lowest_roll['roll']}) and lost {lost_amount} points. The points were distributed among the other players.")
 
-        # Clear the roll game data for this channel
         roll_games[channel_id] = []
         save_json(POINTS_FILE, user_points)
