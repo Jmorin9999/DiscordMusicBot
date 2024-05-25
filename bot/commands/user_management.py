@@ -14,23 +14,29 @@ def setup(bot, user_points, POINTS_FILE):
 
     @bot.command(name='loan')
     async def loan(ctx, borrower: discord.Member, amount: int):
-        lender = str(ctx.author)
-        borrower = str(borrower)
-        user_points.setdefault(lender, BASE_POINTS)
-        user_points.setdefault(borrower, BASE_POINTS)
+        try:
+            lender = str(ctx.author)
+            borrower = str(borrower)
+            user_points.setdefault(lender, BASE_POINTS)  # Ensure lender has an entry in the points dictionary
+            user_points.setdefault(borrower, BASE_POINTS)  # Ensure borrower has an entry in the points dictionary
 
-        if user_points[lender] < amount:
-            await ctx.send('You do not have enough points to loan.')
-            return
+            if user_points[lender] < amount:
+                await ctx.send(f'{lender}, you do not have enough points to loan.')
+                return
 
-        user_points[lender] -= amount
-        user_points[borrower] += amount
-        loan_record = {'lender': lender, 'borrower': borrower, 'amount': amount, 'interest': amount * LOAN_INTEREST_RATE, 'repaid': False}
-        loans.append(loan_record)
+            # Deduct points from the lender and loan to the borrower
+            user_points[lender] -= amount
+            user_points[borrower] += amount
+            loan_record = {'lender': lender, 'borrower': borrower, 'amount': amount, 'interest': amount * LOAN_INTEREST_RATE, 'repaid': False}
+            loans.append(loan_record)
 
-        save_json(POINTS_FILE, user_points)
+            save_json(POINTS_FILE, user_points)
+            save_json(LOANS_FILE, loans)
 
-        await ctx.send(f'{lender} has loaned {amount} points to {borrower} with {LOAN_INTEREST_RATE*100}% interest.')
+            await ctx.send(f'{lender} has loaned {amount} points to {borrower} with {LOAN_INTEREST_RATE*100}% interest.')
+        except Exception as e:
+            await ctx.send("An error occurred while processing the loan.")
+            print(f"Error in loan command: {e}")
 
     @bot.command(name='claim')
     @commands.cooldown(1, CLAIM_COOLDOWN_PERIOD, commands.BucketType.user)

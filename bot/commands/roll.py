@@ -63,5 +63,8 @@ def setup(bot, BASE_POINTS, user_points, POINTS_FILE):
 
         await ctx.send(f"{user_rolls_message}\n{lowest_roll['user']} rolled the lowest ({lowest_roll['roll']}) and lost {lost_amount} points. The points were distributed among the other players.")
 
-        roll_games[channel_id] = []
+        # Clear the roll game data for this channel
+        del roll_games[channel_id]
+        del roll_timers[channel_id]
+        
         save_json(POINTS_FILE, user_points)
