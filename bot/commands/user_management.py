@@ -53,3 +53,18 @@ def setup(bot, user_points, POINTS_FILE):
         except Exception as e:
             await ctx.send("An error occurred while retrieving the leaderboard.")
             print(f"Error in leaderboard command: {e}")
+            
+    @bot.command(name='help')
+    async def help(ctx):
+        help_message = (
+            "Commands available:\n"
+            "!bet <game> <amount> <win/lose> - Place a bet on a game\n"
+            "!cancel_bet <game> - Cancel your bet for a specific game and get your points back\n"
+            "!resolve <game> <result> - Resolve a bet by specifying the game and the result (win/lose)\n"
+            "!leaderboard - Display the current leaderboard\n"
+            "!claim - Claim your weekly points\n"
+            "!roll <amount> - Join a roll game with the specified amount\n"
+            "!help - Display this help message\n"
+        )
+        await ctx.send(help_message)
+
