@@ -54,8 +54,8 @@ def setup(bot, user_points, POINTS_FILE):
             await ctx.send("An error occurred while retrieving the leaderboard.")
             print(f"Error in leaderboard command: {e}")
             
-    @bot.command(name='help')
-    async def help(ctx):
+    @bot.command(name='slurp_help')
+    async def slurp_help(ctx):
         help_message = (
             "Commands available:\n"
             "!bet <game> <amount> <win/lose> - Place a bet on a game\n"
