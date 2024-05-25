@@ -1,6 +1,7 @@
 import discord
-from discord.ext import commands
+import random
 import asyncio
+from discord.ext import commands
 from bot.config import BASE_POINTS, CLAIM_POINTS, CLAIM_COOLDOWN_PERIOD, LOAN_INTEREST_RATE
 from bot.utils.json_handler import save_json
 
