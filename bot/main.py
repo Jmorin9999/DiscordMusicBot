@@ -28,7 +28,7 @@ loans = load_json(LOANS_FILE)
 # Register commands
 betting.setup(bot, BASE_POINTS, CLAIM_POINTS, CLAIM_COOLDOWN_PERIOD, LOAN_INTEREST_RATE, user_points, bet_history, loans, POINTS_FILE, BET_HISTORY_FILE, LOANS_FILE)
 music.setup(bot)
-user_management.setup(bot, user_points, POINTS_FILE)
+user_management.setup(bot, user_points, POINTS_FILE, LOANS_FILE)
 fun.setup(bot)
 roll.setup(bot, BASE_POINTS, user_points, POINTS_FILE)
 

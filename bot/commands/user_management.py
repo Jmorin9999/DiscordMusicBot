@@ -5,7 +5,7 @@ from bot.config import BASE_POINTS, CLAIM_POINTS, CLAIM_COOLDOWN_PERIOD, LOAN_IN
 
 loans = []
 
-def setup(bot, user_points, POINTS_FILE):
+def setup(bot, user_points, POINTS_FILE, LOANS_FILE):
     @bot.command(name='points')
     async def points(ctx):
         user = str(ctx.author)
