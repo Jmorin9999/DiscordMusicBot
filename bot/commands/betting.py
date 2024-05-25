@@ -3,57 +3,81 @@ from discord.ext import commands
 from bot.config import BASE_POINTS, CLAIM_POINTS, CLAIM_COOLDOWN_PERIOD, LOAN_INTEREST_RATE
 from bot.utils.json_handler import save_json
 
+# In-memory database for bets, loans, and locked games
 bets = []
+locked_games = [] 
 
 def setup(bot, BASE_POINTS, CLAIM_POINTS, CLAIM_COOLDOWN_PERIOD, LOAN_INTEREST_RATE, user_points, bet_history, loans, POINTS_FILE, BET_HISTORY_FILE, LOANS_FILE):
     @bot.command(name='bet')
     async def bet(ctx, amount: int, game: str, bet_type: str):
-        user = str(ctx.author)
-        user_points.setdefault(user, BASE_POINTS)
+        try:
+            user = str(ctx.author)
+            user_points.setdefault(user, BASE_POINTS)  # Ensure user has an entry in the points dictionary
 
-        if user_points[user] < amount:
-            await ctx.send('You do not have enough points to place this bet.')
-            return
+            if game in locked_games:
+                await ctx.send(f'Bets are locked for the game {game}.')
+                return
 
-        if bet_type.lower() not in ['win', 'lose']:
-            await ctx.send('Invalid bet type. Please use "win" or "lose".')
-            return
+            if user_points[user] < amount:
+                await ctx.send(f'You do not have enough points to place this bet.')
+                return
 
-        user_points[user] -= amount
-        bet_record = {'user': user, 'amount': amount, 'game': game, 'type': bet_type.lower(), 'outcome': None, 'points_gained': 0}
-        bets.append(bet_record)
+            if bet_type.lower() not in ['win', 'lose']:
+                await ctx.send(f'Invalid bet type. Please use "win" or "lose".')
+                return
 
-        if user not in bet_history:
-            bet_history[user] = []
-        bet_history[user].append(bet_record)
+            # Deduct points and record the bet
+            user_points[user] -= amount
+            bet_record = {'user': user, 'amount': amount, 'game': game, 'type': bet_type.lower(), 'outcome': None, 'points_gained': 0}
+            bets.append(bet_record)
+            
+            if user not in bet_history:
+                bet_history[user] = []
+            bet_history[user].append(bet_record)
 
-        save_json(POINTS_FILE, user_points)
-        save_json(BET_HISTORY_FILE, bet_history)
+            save_json(POINTS_FILE, user_points)
+            save_json(BET_HISTORY_FILE, bet_history)
 
-        await ctx.send(f'{user} has placed a bet of {amount} points on {game} to {bet_type}.')
+            await ctx.send(f'{user} has placed a bet of {amount} points on {game} to {bet_type}.')
+        except Exception as e:
+            await ctx.send("An error occurred while placing your bet.")
+            print(f"Error in bet command: {e}")
+            
+    @bot.command(name='lock_bets')
+    async def lock_bets(ctx, game: str):
+        try:
+            if game not in locked_games:
+                locked_games.append(game)
+                await ctx.send(f'Bets for the game {game} are now locked.')
+            else:
+                await ctx.send(f'Bets for the game {game} are already locked.')
+        except Exception as e:
+            await ctx.send("An error occurred while locking the bets.")
+            print(f"Error in lock_bets command: {e}")
 
     @bot.command(name='cancel_bet')
     async def cancel_bet(ctx, game: str):
         try:
             user = str(ctx.author)
-            if game in bets and any(bet['user'] == user for bet in bets[game]):
-                user_bets = [bet for bet in bets[game] if bet['user'] == user]
+            user_bets = [bet for bet in bets if bet['user'] == user and bet['game'] == game]
+            if user_bets:
                 for bet in user_bets:
                     user_points[user] += bet['amount']
-                    bets[game].remove(bet)
-                bet_history[user] = [bet for bet in bet_history[user] if bet['game'] != game]
+                    bets.remove(bet)
+                    bet_history[user].remove(bet)
                 save_json(POINTS_FILE, user_points)
                 save_json(BET_HISTORY_FILE, bet_history)
-                await ctx.send(f'{user}, your bet in {game} has been canceled.')
+                await ctx.send(f'{user}, your bets on {game} have been cancelled and points refunded.')
             else:
-                await ctx.send(f'{user}, you have no bet in {game} to cancel.')
+                await ctx.send(f'{user}, you have no bets on {game} to cancel.')
         except Exception as e:
-            await ctx.send("An error occurred while canceling your bet.")
+            await ctx.send("An error occurred while cancelling bets.")
             print(f"Error in cancel_bet command: {e}")
     
     @bot.command(name='resolve')
     async def resolve(ctx, game: str, outcome: str):
         try:
+            global bets
             total_bet_points = sum(bet['amount'] for bet in bets if bet['game'] == game)
             if outcome.lower() not in ['win', 'lose']:
                 await ctx.send(f'Invalid outcome. Please use "win" or "lose".')

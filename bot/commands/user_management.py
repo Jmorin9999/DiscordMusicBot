@@ -3,6 +3,8 @@ from discord.ext import commands
 from bot.utils.json_handler import save_json
 from bot.config import BASE_POINTS, CLAIM_POINTS, CLAIM_COOLDOWN_PERIOD, LOAN_INTEREST_RATE
 
+loans = []
+
 def setup(bot, user_points, POINTS_FILE):
     @bot.command(name='points')
     async def points(ctx):
