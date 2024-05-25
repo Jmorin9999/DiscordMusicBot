@@ -138,10 +138,14 @@ def setup(bot, BASE_POINTS, CLAIM_POINTS, CLAIM_COOLDOWN_PERIOD, LOAN_INTEREST_R
             
     @bot.command(name='current_bets')
     async def current_bets(ctx):
-        if not bets:
-            await ctx.send("No current bets.")
-        else:
-            bet_message = "Current Bets:\n"
-            for game, bet_list in bets.items():
-                bet_message += f"{game}: {len(bet_list)} bet(s)\n"
-            await ctx.send(bet_message)
+        try:
+            if bets:
+                current_bets_message = "Current bets:\n"
+                for bet in bets:
+                    current_bets_message += f"User: {bet['user']}, Game: {bet['game']}, Amount: {bet['amount']} points, Type: {bet['type']}\n"
+                await ctx.send(current_bets_message)
+            else:
+                await ctx.send('There are no current bets.')
+        except Exception as e:
+            await ctx.send("An error occurred while retrieving current bets.")
+            print(f"Error in current_bets command: {e}")
