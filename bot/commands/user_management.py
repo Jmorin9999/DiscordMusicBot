@@ -43,12 +43,13 @@ def setup(bot, user_points, POINTS_FILE, LOANS_FILE):
     async def claim(ctx):
         user = str(ctx.author)
         user_points.setdefault(user, BASE_POINTS)
-        if user_points[user] < CLAIM_POINTS:
+        if user_points[user] == 0:
             user_points[user] = CLAIM_POINTS
             save_json(POINTS_FILE, user_points)
             await ctx.send(f'{user}, your points have been reset to {CLAIM_POINTS}.')
         else:
-            await ctx.send(f'{user}, you already have {user_points[user]} points, which is above the claim amount.')
+            await ctx.send(f'{user}, you already have {user_points[user]} points, so you cannot claim additional points.')
+
     
     @bot.command(name='leaderboard')
     async def leaderboard(ctx):
