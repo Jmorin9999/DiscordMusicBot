@@ -130,6 +130,10 @@ def setup(bot, BASE_POINTS, CLAIM_POINTS, CLAIM_COOLDOWN_PERIOD, LOAN_INTEREST_R
             save_json(POINTS_FILE, user_points)
             save_json(BET_HISTORY_FILE, bet_history)
             save_json(LOANS_FILE, loans)
+            
+            # Unlock the game
+            if game in locked_games:
+                locked_games.remove(game)
 
             await ctx.send(f'Game {game} resolved. Winners received payouts based on odds of {odds:.2f}.')
         except Exception as e:
