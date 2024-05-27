@@ -17,9 +17,9 @@ logging.basicConfig(level=logging.INFO)
 bot = commands.Bot(command_prefix='!', intents=discord.Intents.all())
 
 # Load data files
-POINTS_FILE = '/var/tmp/discord/user_points.json'
-BET_HISTORY_FILE = '/var/tmp/discord/bet_history.json'
-LOANS_FILE = '/var/tmp/discord/loans.json'
+POINTS_FILE = '/home/ansible/discord/user_points.json'
+BET_HISTORY_FILE = '/home/ansible/discord/bet_history.json'
+LOANS_FILE = '/home/ansible/discord/loans.json'
 
 user_points = load_json(POINTS_FILE)
 bet_history = load_json(BET_HISTORY_FILE)
