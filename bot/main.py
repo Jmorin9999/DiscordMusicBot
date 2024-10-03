@@ -1,6 +1,7 @@
 import os
 import logging
 import discord
+import json
 from bot.config import BASE_POINTS, CLAIM_POINTS, CLAIM_COOLDOWN_PERIOD, LOAN_INTEREST_RATE
 from discord.ext import commands
 from dotenv import load_dotenv
@@ -17,9 +18,19 @@ logging.basicConfig(level=logging.INFO)
 bot = commands.Bot(command_prefix='!', intents=discord.Intents.all())
 
 # Load data files
-POINTS_FILE = '/home/ansible/discord/user_points.json'
-BET_HISTORY_FILE = '/home/ansible/discord/bet_history.json'
-LOANS_FILE = '/home/ansible/discord/loans.json'
+POINTS_FILE = '/opt/discord/user_points.json'
+BET_HISTORY_FILE = '/opt/discord/bet_history.json'
+LOANS_FILE = '/opt/discord/loans.json'
+
+# Default data to be used if files are missing
+default_data = {}
+
+# Function to ensure files exist and create them if missing
+def ensure_file_exists(file_path, default_content):
+    if not os.path.exists(file_path):
+        logging.info(f"{file_path} not found. Creating new file.")
+        with open(file_path, 'w') as f:
+            json.dump(default_content, f)
 
 user_points = load_json(POINTS_FILE)
 bet_history = load_json(BET_HISTORY_FILE)
