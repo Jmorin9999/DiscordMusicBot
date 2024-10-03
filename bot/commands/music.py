@@ -1,6 +1,7 @@
 import discord
 from discord.ext import commands
-from pytube import YouTube
+from pytubefix import YouTube
+from pytubefix.cli import on_progress
 import asyncio
 from bot.utils.json_handler import load_json, save_json
 
