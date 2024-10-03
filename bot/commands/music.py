@@ -19,13 +19,32 @@ def setup(bot):
             await play_music(ctx, url)
 
     async def play_music(ctx, url):
-        yt = YouTube(url)
-        stream = yt.streams.filter(only_audio=True).first()
-        voice_client = discord.utils.get(bot.voice_clients, guild=ctx.guild)
-        if voice_client:
-            voice_client.stop()
-            options = "-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5"
-            voice_client.play(discord.FFmpegPCMAudio(stream.url, before_options=options), after=lambda e: asyncio.run_coroutine_threadsafe(play_next(ctx), bot.loop))
+        try:
+            yt = YouTube(url)
+            stream = yt.streams.filter(only_audio=True).first()
+            if not stream:
+                await ctx.send("Could not retrieve audio stream from YouTube.")
+                return
+            
+            voice_client = discord.utils.get(bot.voice_clients, guild=ctx.guild)
+            if voice_client:
+                # Stop any currently playing audio
+                voice_client.stop()
+                
+                # FFmpeg options for reconnecting streams
+                ffmpeg_options = {
+                    'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5',
+                    'options': '-vn'
+                }
+                
+                # Play the audio using FFmpegPCMAudio
+                voice_client.play(discord.FFmpegPCMAudio(stream.url, **ffmpeg_options),
+                                  after=lambda e: asyncio.run_coroutine_threadsafe(play_next(ctx), bot.loop))
+                
+                await ctx.send(f"Now playing: {yt.title}")
+        
+        except Exception as e:
+            await ctx.send(f"An error occurred: {str(e)}")
 
     async def join_voice_channel(channel_id):
         channel = bot.get_channel(channel_id)
