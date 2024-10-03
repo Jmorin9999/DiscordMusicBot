@@ -7,15 +7,22 @@ from bot.utils.json_handler import load_json, save_json
 SongQueue = []
 
 def setup(bot):
+# The play command, which uses join_voice_channel
     @bot.command(name='play')
     async def play(ctx, *, url: str):
         voice_client = discord.utils.get(bot.voice_clients, guild=ctx.guild)
+        
+        if not ctx.author.voice:
+            await ctx.send("You need to be in a voice channel to use this command.")
+            return
+
         if voice_client and voice_client.is_playing():
             SongQueue.append(url)
             yt = YouTube(url)
             await ctx.send(f"Added to queue: {yt.title}")
         else:
-            await join_voice_channel(ctx.author.voice.channel.id)
+            # Join the voice channel if not already connected
+            await join_voice_channel(ctx)
             await play_music(ctx, url)
 
     async def play_music(ctx, url):
@@ -46,9 +53,16 @@ def setup(bot):
         except Exception as e:
             await ctx.send(f"An error occurred: {str(e)}")
 
-    async def join_voice_channel(channel_id):
-        channel = bot.get_channel(channel_id)
-        if channel:
+    async def join_voice_channel(ctx):
+        channel = ctx.author.voice.channel  # Get the channel the user is currently in
+        voice_client = discord.utils.get(bot.voice_clients, guild=ctx.guild)
+
+        if voice_client and voice_client.is_connected():
+            # If already connected, move to the channel if different
+            if voice_client.channel != channel:
+                await voice_client.move_to(channel)
+        else:
+            # Not connected, so connect to the channel
             await channel.connect()
 
     async def play_next(ctx):
