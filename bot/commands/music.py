@@ -78,5 +78,15 @@ def setup(bot):
             await ctx.send(f"Current Queue:\n{queue_message}")
         else:
             await ctx.send("The queue is empty.")
+
+    @bot.command()
+    async def skip(ctx):
+        voice = ctx.voice_client
+
+        if voice and voice.is_playing():
+            voice.stop()
+            await ctx.send("Skipped the current track.")
+        else:
+            await ctx.send("No track is currently playing.")
     
     # Other music commands can be added here
