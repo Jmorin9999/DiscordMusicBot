@@ -18,9 +18,9 @@ logging.basicConfig(level=logging.INFO)
 bot = commands.Bot(command_prefix='!', intents=discord.Intents.all())
 
 # Load data files
-POINTS_FILE = '/opt/discord/user_points.json'
-BET_HISTORY_FILE = '/opt/discord/bet_history.json'
-LOANS_FILE = '/opt/discord/loans.json'
+POINTS_FILE = '/opt/music_bot/user_points.json'
+BET_HISTORY_FILE = '/opt/music_bot/bet_history.json'
+LOANS_FILE = '/opt/music_bot/loans.json'
 
 # Default data to be used if files are missing
 default_data = {}
