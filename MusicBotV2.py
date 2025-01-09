@@ -88,7 +88,7 @@ class MusicBot(commands.Bot):
         async def StartDate(ctx):
             channelId = 1319490837868056597
             channel = bot.get_channel(channelId)
-            file = "WeeklyStats.json"
+            file = "/opt/league_bot/WeeklyStats.json"
             if channel:
                 try:
                     with open(file, "r") as file:
@@ -106,7 +106,7 @@ class MusicBot(commands.Bot):
         async def ResetDate(ctx):
             channelId = 1319490837868056597
             channel = bot.get_channel(channelId)
-            file = "WeeklyStats.json"
+            file = "/opt/league_bot/WeeklyStats.json"
             if channel:
                 try:
                     with open(file, "r") as file:
@@ -139,7 +139,7 @@ class MusicBot(commands.Bot):
         async def StatCheck(ctx, *,name: str):
             channelId = 1319490837868056597
             channel = bot.get_channel(channelId)
-            file = "WeeklyStats.json"  
+            file = "/opt/league_bot/WeeklyStats.json"  
             if channel:
                 try:
                     with open(file, "r") as file:
@@ -181,7 +181,7 @@ class MusicBot(commands.Bot):
         async def KDR(ctx):
             channelId = 1319490837868056597
             channel = bot.get_channel(channelId)
-            file = "WeeklyStats.json"
+            file = "/opt/league_bot/WeeklyStats.json"
             if channel:
                 try:
                     with open(file, "r") as file:
@@ -192,7 +192,7 @@ class MusicBot(commands.Bot):
 
                         for player, stats in data.items():
 
-                            FormattedMessage += f"- {player} -- **{stats["KDA"]}**\n"
+                            FormattedMessage += f"- {player} -- **{stats['KDA']}**\n"
 
                         await channel.send(FormattedMessage)
 
@@ -205,7 +205,7 @@ class MusicBot(commands.Bot):
         async def KPPG(ctx):
             channelId = 1319490837868056597
             channel = bot.get_channel(channelId)
-            file = "WeeklyStats.json"
+            file = "/opt/league_bot/WeeklyStats.json"
             if channel:
                 try:
                     with open(file, "r") as file:
@@ -216,7 +216,7 @@ class MusicBot(commands.Bot):
 
                         for player, stats in data.items():
 
-                            FormattedMessage += f"- {player} -- **{stats["AverageKillParticipationPerGame"]} %**\n"
+                            FormattedMessage += f"- {player} -- **{stats['AverageKillParticipationPerGame']} %**\n"
 
                         await channel.send(FormattedMessage)
 
@@ -229,7 +229,7 @@ class MusicBot(commands.Bot):
         async def Leaderboard(ctx):
             ChannelID = 1319490837868056597  # Channel ID for the league leaderboard
             channel = bot.get_channel(ChannelID)
-            file = "WeeklyStats.json"
+            file = "/opt/league_bot/WeeklyStats.json"
             Today = datetime.combine(datetime.today(), datetime.min.time())
 
             if channel:
@@ -546,7 +546,7 @@ class MusicBot(commands.Bot):
         self.run(self.token)
 
 if __name__ == "__main__":
-    TOKEN = ""
+    TOKEN = os.getenv("DISCORD_TOKEN")
     intents = discord.Intents.all()
     bot = MusicBot(command_prefix="!!", intents=intents, token=TOKEN)
     bot.run_bot()
