@@ -551,3 +551,5 @@ if __name__ == "__main__":
     intents = discord.Intents.all()
     bot = MusicBot(command_prefix="!!", intents=intents, token=TOKEN)
     bot.run_bot()
+
+#jacob if this doesnt work im gonna KILL MYSELF
