@@ -546,7 +546,8 @@ class MusicBot(commands.Bot):
         self.run(self.token)
 
 if __name__ == "__main__":
-    TOKEN = os.getenv("DISCORD_TOKEN")
+    with open("/opt/token", "r") as f:
+        TOKEN = f.read().strip()
     intents = discord.Intents.all()
     bot = MusicBot(command_prefix="!!", intents=intents, token=TOKEN)
     bot.run_bot()
