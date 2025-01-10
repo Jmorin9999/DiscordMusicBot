@@ -64,10 +64,10 @@ class MusicBot(commands.Bot):
             else:
                 await ctx.send("Channel not found!")
 
-	@self.command()
-	async def fent(ctx):
-	    channelId = 1319490837868056597
-	    channel = bot.get_channel(channelId)
+        @self.command()
+        async def fent(ctx):
+            channelId = 1319490837868056597
+            channel = bot.get_channel(channelId)
             if channel:
                 await channel.send("Fent reactors: online")
             else:
