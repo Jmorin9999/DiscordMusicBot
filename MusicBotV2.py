@@ -74,6 +74,15 @@ class MusicBot(commands.Bot):
                 await ctx.send("Channel not found!")
 
         @self.command()
+        async def ThirteenPercent(ctx):
+            channelId = 1319490837868056597
+            channel = bot.get_channel(channelId)
+            if channel:
+                await channel.send("13 % OF POPULATION")
+            else:
+                await ctx.send("Channel not found!")
+
+        @self.command()
         async def Commands(ctx):
             channelId = 1319490837868056597
             channel = bot.get_channel(channelId)
