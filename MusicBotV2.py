@@ -78,7 +78,7 @@ class MusicBot(commands.Bot):
             channelId = 1319490837868056597
             channel = bot.get_channel(channelId)
             if channel:
-                await channel.send("13 % OF POPULATION")
+                await channel.send("13% OF POPULATION")
             else:
                 await ctx.send("Channel not found!")
 
