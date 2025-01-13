@@ -174,7 +174,11 @@ class MusicBot(commands.Bot):
                             f"- Double Kills: **{data['doubleKills']}**\n"
                             f"- Triple Kills: **{data['tripleKills']}**\n"
                             f"- Quadra Kills: **{data['quadraKills']}**\n"
-                            f"- KDR: **{data['KDA']}**\n"
+                            f"- KDR: **{data['KDR']}**\n"
+                            f"- KDA: **{data['KDA']}**\n"
+                            f"- KDAList: **{data['KDAList']}**\n"
+                            f"- KDRList: **{data['KDRList']}**\n"
+                            f"- KillParticipationList:  **{data['KillParticipationList']}**\n"
                             f"- WLR: **{data['WLR']}**\n"
                             f"- I inted **{data['TimesInted']}** times!\n")
 
